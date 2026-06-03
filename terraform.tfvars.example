@@ -1,0 +1,41 @@
+global_settings = {
+  aws_region           = "us-east-1"
+  vpc_id               = "vpc-12345678"
+  subnet_id            = "subnet-12345678"
+  key_pair_name        = "2026_key"
+  allowed_ingress_cidr = "1.2.3.4/32"
+  local_network_cidr   = "172.31.16.0/24"
+  security_group_name  = "windows-vm-allow-all-from-trusted-ip"
+  ansible_username     = "ansible_user"
+  ansible_password     = "REPLACE_WITH_STRONG_PASSWORD"
+  common_tags = {
+    workload    = "windows"
+    managed_by  = "terraform"
+    environment = "dev"
+  }
+}
+
+# Define unique nodes (map keys become EC2 Name tags)
+compute_nodes = {
+  "win-app-01" = {
+    instance_type       = "t3.small"
+    data_disk_1_size_gb = 0
+    tags = {
+      role               = "app"
+      notes              = "Primary application node"
+      service_now_ticket = "CHG0000001"
+    }
+  }
+  "win-app-02" = {
+    instance_type       = "t3.small"
+    data_disk_1_size_gb = 50
+    tags = {
+      role               = "app"
+      notes              = "Secondary application node"
+      service_now_ticket = "CHG0000001"
+    }
+  }
+}
+
+
+

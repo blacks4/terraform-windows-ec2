@@ -1,0 +1,25 @@
+<powershell>
+$ErrorActionPreference = "Stop"
+
+# Enable WinRM over HTTP and ensure service is running.
+winrm quickconfig -q
+winrm set "winrm/config/service" '@{AllowUnencrypted="true"}'
+winrm set "winrm/config/service/auth" '@{Basic="true"}'
+Set-Service -Name WinRM -StartupType Automatic
+Start-Service -Name WinRM
+
+# Open WinRM HTTP port through Windows Firewall.
+if (-not (Get-NetFirewallRule -DisplayName "WinRM HTTP Inbound 5985" -ErrorAction SilentlyContinue)) {
+    New-NetFirewallRule -DisplayName "WinRM HTTP Inbound 5985" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 5985
+}
+
+# Create shared Ansible local admin account if missing.
+$ansibleUser = "${ansible_username}"
+$ansiblePassword = ConvertTo-SecureString "${ansible_password}" -AsPlainText -Force
+
+if (-not (Get-LocalUser -Name $ansibleUser -ErrorAction SilentlyContinue)) {
+    New-LocalUser -Name $ansibleUser -Password $ansiblePassword -AccountNeverExpires -PasswordNeverExpires
+}
+
+Add-LocalGroupMember -Group "Administrators" -Member $ansibleUser -ErrorAction SilentlyContinue
+</powershell>
