@@ -39,6 +39,11 @@ variable "compute_nodes" {
   }
 
   validation {
+    condition     = length(var.compute_nodes) <= 10
+    error_message = "compute_nodes cannot contain more than 10 nodes."
+  }
+
+  validation {
     condition = alltrue([
       for node in values(var.compute_nodes) : contains(["t3.micro", "t3.small"], node.instance_type)
     ])

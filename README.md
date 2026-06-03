@@ -90,6 +90,8 @@ compute_nodes = {
 }
 ```
 
+`compute_nodes` is limited to 10 nodes total.
+
 See `variables.tf` for full defaults and descriptions.
 
 ## Usage
