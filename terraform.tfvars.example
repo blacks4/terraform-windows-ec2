@@ -1,3 +1,5 @@
+ansible_password = "REPLACE_WITH_STRONG_PASSWORD"
+
 global_settings = {
   aws_region           = "us-east-1"
   vpc_id               = "vpc-12345678"
@@ -7,7 +9,6 @@ global_settings = {
   local_network_cidr   = "172.31.16.0/24"
   security_group_name  = "windows-vm-allow-all-from-trusted-ip"
   ansible_username     = "ansible_user"
-  ansible_password     = "REPLACE_WITH_STRONG_PASSWORD"
   common_tags = {
     workload    = "windows"
     managed_by  = "terraform"

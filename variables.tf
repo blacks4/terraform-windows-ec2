@@ -9,43 +9,34 @@ variable "global_settings" {
     local_network_cidr   = optional(string, "172.31.16.0/24")
     security_group_name  = optional(string, "windows-vm-allow-all-from-trusted-ip")
     ansible_username     = optional(string, "ansible")
-    ansible_password     = optional(string)
     common_tags          = optional(map(string), {})
   })
-  default   = {}
-  sensitive = true
-
-  validation {
-    condition     = length(trimspace(coalesce(var.global_settings.ansible_password, ""))) > 0
-    error_message = "global_settings.ansible_password is required and cannot be empty."
-  }
+  default = {}
 }
 
-variable "instance_count" {
-  description = "Number of Windows EC2 instances to create."
-  type        = number
-  default     = 1
-}
-
-variable "instance_type" {
-  description = "Default EC2 instance type used only when compute_nodes is empty."
+variable "ansible_password" {
+  description = "Password for the local Windows Ansible account used on all VMs."
   type        = string
-  default     = "t3.micro"
+  sensitive   = true
 
   validation {
-    condition     = contains(["t3.micro", "t3.small"], var.instance_type)
-    error_message = "instance_type must be one of: t3.micro or t3.small."
+    condition     = length(trimspace(var.ansible_password)) > 0
+    error_message = "ansible_password is required and cannot be empty."
   }
 }
 
 variable "compute_nodes" {
-  description = "Map of uniquely named compute nodes. Map keys become EC2 Name tags. When set, this overrides instance_count/name_prefix/instance_type defaults."
+  description = "Map of uniquely named compute nodes. Map keys become EC2 Name tags."
   type = map(object({
     instance_type       = string
     data_disk_1_size_gb = optional(number, 0)
     tags                = optional(map(string), {})
   }))
-  default = {}
+
+  validation {
+    condition     = length(var.compute_nodes) > 0
+    error_message = "compute_nodes is required and must contain at least one node."
+  }
 
   validation {
     condition = alltrue([
@@ -60,12 +51,5 @@ variable "compute_nodes" {
     ])
     error_message = "Each compute_nodes[*].data_disk_1_size_gb must be greater than or equal to 0."
   }
-}
-
-
-variable "name_prefix" {
-  description = "Prefix used for instance Name tags only when compute_nodes is empty."
-  type        = string
-  default     = "windows-ansible"
 }
 

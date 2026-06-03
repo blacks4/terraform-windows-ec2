@@ -48,12 +48,12 @@ For production, restrict inbound ports/CIDRs, prefer WinRM over HTTPS (5986), an
 
 Required:
 
-- `global_settings.ansible_password` (sensitive)
+- `ansible_password` (sensitive)
+- `compute_nodes` (map of unique node definitions)
 
 Common optional inputs:
 
 - `global_settings` (object for shared settings)
-- `compute_nodes` (map of unique node definitions)
 
 `global_settings` schema:
 
@@ -67,9 +67,12 @@ global_settings = {
   local_network_cidr   = "172.31.16.0/24"
   security_group_name  = "windows-vm-allow-all-from-trusted-ip"
   ansible_username     = "ansible"
-  ansible_password     = "REPLACE_WITH_STRONG_PASSWORD"
   common_tags          = { environment = "dev" }
 }
+```
+
+```hcl
+ansible_password = "REPLACE_WITH_STRONG_PASSWORD"
 ```
 
 `compute_nodes` schema:
@@ -77,7 +80,7 @@ global_settings = {
 ```hcl
 compute_nodes = {
   "win-app-01" = {
-    instance_type       = "t3.small" # allowed: t3.micro, t3.small, t3.medium
+    instance_type       = "t3.small" # allowed: t3.micro, t3.small
     data_disk_1_size_gb = 0            # optional, defaults to 0
     tags = {
       role  = "app"
@@ -86,8 +89,6 @@ compute_nodes = {
   }
 }
 ```
-
-Legacy fallback variables (`instance_count`, `instance_type`, `name_prefix`) still work only when `compute_nodes` is empty.
 
 See `variables.tf` for full defaults and descriptions.
 

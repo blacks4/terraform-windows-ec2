@@ -24,18 +24,8 @@ resource "random_string" "security_group_suffix" {
 }
 
 locals {
-  # If compute_nodes is provided, use it. Otherwise preserve legacy behavior.
-  compute_nodes_effective = length(var.compute_nodes) > 0 ? var.compute_nodes : {
-    for idx in range(var.instance_count) :
-    format("%s-%02d", var.name_prefix, idx + 1) => {
-      instance_type       = var.instance_type
-      data_disk_1_size_gb = 0
-      tags                = {}
-    }
-  }
-
   compute_nodes_with_data_disk = {
-    for node_name, node in local.compute_nodes_effective :
+    for node_name, node in var.compute_nodes :
     node_name => node
     if node.data_disk_1_size_gb > 0
   }
@@ -118,7 +108,7 @@ resource "aws_security_group" "windows_vm_sg" {
 }
 
 resource "aws_instance" "windows_vm" {
-  for_each = local.compute_nodes_effective
+  for_each = var.compute_nodes
 
   ami                    = data.aws_ami.windows_2022.id
   instance_type          = each.value.instance_type
@@ -128,7 +118,7 @@ resource "aws_instance" "windows_vm" {
 
   user_data = templatefile("${path.module}/userdata.ps1.tftpl", {
     ansible_username = var.global_settings.ansible_username
-    ansible_password = var.global_settings.ansible_password
+    ansible_password = var.ansible_password
   })
 
   tags = merge(
